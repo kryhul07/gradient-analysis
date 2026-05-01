@@ -1,0 +1,293 @@
+---
+title: "Gradient a smerová derivácia"
+author: "Maksym Kryhul"
+date: today
+date-format: "DD.MM.YYYY"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    theme: cosmo
+  pdf:
+    toc: true
+    number-sections: true
+lang: sk
+bibliography: literatura.bib
+---
+
+# Úvod
+
+Gradient je vektor, ktorý v každom bode priestoru ukazuje smer najrýchlejšieho
+rastu danej skalárnej funkcie, pričom jeho veľkosť určuje rýchlosť tohto rastu.
+Z hľadiska geometrického významu je vektor gradientu vždy kolmý na vrstevnice
+(alebo ekvipotenciálne plochy) danej funkcie. Gradient patrí medzi kľúčové
+pojmy matematickej analýzy funkcií viacerých premenných a úzko súvisí
+s parciálnymi deriváciami a smerovou deriváciou.
+
+Nachádza uplatnenie v mnohých oblastiach aplikovanej matematiky, fyziky
+a informatiky. Napríklad v strojovom učení sa gradient využíva v algoritme
+gradientného zostupu na minimalizáciu účelovej funkcie. Vo fyzike gradient
+teplotného poľa udáva smer tepelného toku.
+
+V tejto správe sa venujeme gradientu a smerovej derivácii funkcií viacerých
+premenných. Výpočty realizujeme symbolicky v jazyku Python, výsledky
+vizualizujeme a interpretujeme ich geometrický význam.
+
+Ciele správy:
+
+- vypočítať parciálne derivácie a gradient zadanej funkcie.
+- určiť smerovú deriváciu v danom smere.
+- vizualizovať povrch funkcie pomocou 3D grafu.
+- analyzovať normu gradientu v rôznych bodoch.
+- interpretovať výsledky geometricky.
+
+# Teoretické pozadie
+
+Teoretické základy sú prevzaté z [@stewart2016calculus] 
+a [@bacigal2026uvod].
+
+## Parciálne derivácie
+
+Nech $f(x, y)$ je funkcia dvoch premenných. Parciálna derivácia funkcie $f$
+podľa premennej $x$ je definovaná ako:
+
+$$
+\frac{\partial f}{\partial x} = \lim_{\Delta x \to 0} \frac{f(x + \Delta x, y) - f(x, y)}{\Delta x}
+$$ {#eq-partial}
+
+Analogicky definujeme parciálnu deriváciu podľa $y$.
+
+## Gradient
+
+Gradient funkcie $f(x,y)$ je vektorová funkcia  definovaná ako: 
+
+$$
+\nabla f(x, y) = \left( \frac{\partial f}{\partial x}, \frac{\partial f}{\partial y} \right)
+$${#eq-gradient}
+
+Gradient ukazuje smer **najrýchlejšieho rastu** funkcie v danom bode.
+
+## Smerová derivácia
+
+Smerová derivácia funkcie $f$ v bode $B$ v smere vektora $\vec{v}$ je:
+
+$$
+D_{\vec{v}} f = \nabla f \cdot \frac{\vec{v}}{|\vec{v}|}
+$$ {#eq-directional}
+
+kde $\nabla f$ je gradient funkcie v danom bode a $\frac{\vec{v}}{|\vec{v}|}$
+je jednotkový vektor smeru. Smerová derivácia udáva rýchlosť zmeny funkcie
+v smere vektora $\vec{v}$.
+
+# Výpočty
+
+V tejto správe používame knižnicu `sympy` [@sympy2023] — 
+knižnicu pre symbolickú matematiku v jazyku Python,
+`numpy` [@numpy2020] — pre numerické výpočty na sieti bodov.
+
+## Úloha 1: Gradient funkcie
+Vypočítame gradient funkcie $f(x, y) = \sqrt{4 + x^2 + y^2}$ a vyjadríme
+ho v bode $A = (1, 2)$ (Úloha 3.3a, @tomek2026)
+```{python}
+#| label: gradient-vypocet
+#| echo: true
+
+import sympy as sp
+
+x, y = sp.symbols('x y')
+
+f = sp.sqrt(4 + x**2 + y**2)
+
+df_dx = sp.diff(f, x)
+df_dy = sp.diff(f, y)
+
+#gradient
+gradient = sp.Matrix([df_dx, df_dy])
+print("Gradient f =", gradient)
+
+#gradient v bode A = (1, 2)
+bod_A = {x:1, y:2}
+gradient_A = gradient.subs(bod_A)
+print("Gradient v bode A =", gradient_A)
+```
+
+Z výsledku vidíme, že gradient funkcie $f$ v bode $A = (1, 2)$ je:
+
+$$
+\nabla f(1, 2) = \left( \frac{1}{3}, \frac{2}{3} \right)
+$$
+
+
+## Úloha 2: Smerová derivácia
+Vypočítame smerovú deriváciu funkcie $x^2 y + x y^2$ v bode $B = (1, 2)$
+v smere vektora $\vec{v} = (3, 4)$ (Úloha 3.5a, @tomek2026)
+
+```{python}
+#| label: smerova-derivacia
+#| echo: true
+
+import sympy as sp
+
+x, y = sp.symbols('x y')
+
+f = x**2 * y + x * y**2
+
+df_dx = sp.diff(f, x)
+df_dy = sp.diff(f, y)
+
+# gradient
+gradient = sp.Matrix([df_dx, df_dy])
+
+# bod B a vektor v
+
+bod_B = {x:1, y:2}
+v = sp.Matrix([3, 4])
+
+#gradient v bode B
+gradient_B = gradient.subs(bod_B)
+
+# normalizovaný vektor
+v_norm = v / v.norm()
+
+# smerová derivácia
+D_v = gradient_B.dot(v_norm)
+D_v = sp.simplify(D_v)
+
+print("Gradient =", gradient)
+print("Gradient v bode B =", gradient_B)
+print("Smerová derivácia =", D_v)
+
+```
+
+Z výsledku vidíme, že gradient funkcie $f$ v bode $B = (1, 2)$ je
+$\nabla f(1, 2) = (8, 5)$ a smerová derivácia v smere vektora $\vec{v} = (3, 4)$ je:
+
+$$
+D_{\vec{v}}f(1, 2) = \frac{44}{5} = 8{,}8
+$$
+
+To znamená, že funkcia rastie rýchlosťou $8{,}8$ na jednotku dĺžky
+v smere vektora $\vec{v} = (3, 4)$.
+
+
+# Vizualizácia
+
+V tejto kapitole vizualizujeme funkciu $f(x, y) = x^2y + xy^2$
+pomocou knižníc `numpy` [@numpy2020] a `matplotlib` [@matplotlib2007].
+
+## 3D Graf funkcie
+
+```{python}
+#| label: vizualizacia-3d
+#| echo: true
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# vytvoríme sieť bodov
+
+x = np.linspace(-3, 3, 50)
+y = np.linspace(-3, 3, 50)
+X, Y = np.meshgrid(x, y)
+
+# funkcia 
+F = X**2 * Y + X * Y**2
+
+# 3D graf
+fig = plt.figure(figsize=(8,6))
+ax = fig.add_subplot(111, projection = '3d')
+
+ax.plot_surface(X, Y, F, cmap='rainbow', alpha = 0.85)
+
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.set_zlabel('f(x, y)')
+ax.set_title('Graf funkcie f(x, y) = x²y + xy²')
+
+plt.tight_layout()
+plt.show()
+```
+
+Graf zobrazuje povrch funkcie $f(x, y) = x^2y + xy^2$. 
+Červená farba zodpovedá vysokým hodnotám funkcie, 
+modrá nízkym hodnotám.
+
+
+
+## Porovnanie normy gradientu v rôznych bodoch
+
+```{python}
+#| label: bar-chart
+#| echo: true
+
+import numpy as np
+import matplotlib.pyplot as plt
+import sympy as sp
+
+x, y = sp.symbols('x y')
+
+f = x**2 * y + x * y**2
+df_dx = sp.diff(f, x)
+df_dy = sp.diff(f, y)
+
+# body
+body = [(0, 0), (1, 1), (1, 2), (2, 1), (-1, 2), (2, 2), (-2, -1)]
+normy = []
+
+for (bx, by) in body:
+    gx = float(df_dx.subs({x: bx, y: by}))
+    gy = float(df_dy.subs({x: bx, y: by}))
+    normy.append(round((gx**2 + gy**2)**0.5, 3))
+
+# graf
+nazvy = [f'({bx},{by})' for (bx, by) in body]
+farby = ['red' if n > 7 else 'blue' for n in normy]
+
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.bar(nazvy, normy, color=farby)
+ax.set_xlabel('Bod (x, y)')
+ax.set_ylabel('Norma gradientu |∇f|')
+ax.set_title('Porovnanie normy gradientu v rôznych bodoch funkcie x²y + xy²')
+ax.axhline(y=7, color='gray', linestyle='--', label='hranica rýchleho rastu')
+ax.legend()
+plt.tight_layout()
+plt.show()
+```
+
+Z grafu vidíme, že norma gradientu sa výrazne líši v závislosti
+od polohy bodu. V bode $(2, 2)$ je norma gradientu najväčšia
+($|\nabla f| \approx 16.97$), čo znamená, že funkcia sa v tomto bode
+mení najrýchlejšie. Naopak, v bode $(0, 0)$ je norma gradientu
+nulová — ide o stacionárny bod, kde funkcia nemá žiadny smer
+najrýchlejšieho rastu.
+
+Červené stĺpce označujú body s rýchlym rastom ($|\nabla f| > 7$),
+modré stĺpce body s pomalším rastom.
+
+
+# Záver
+
+V tejto správe sme sa venovali gradientu a smerovej derivácii
+funkcií viacerých premenných.
+
+Hlavné výsledky:
+
+- Vypočítali sme gradient funkcie $f(x, y) = \sqrt{4 + x^2 + y^2}$
+  a vyjadrili ho v bode $A = (1, 2)$:
+  $$\nabla f(1, 2) = \left(\frac{1}{3}, \frac{2}{3}\right)$$
+
+- Vypočítali sme smerovú deriváciu funkcie $f(x, y) = x^2y + xy^2$
+  v bode $B = (1, 2)$ v smere vektora $\vec{v} = (3, 4)$:
+  $$D_{\vec{v}}f(1, 2) = \frac{44}{5}$$
+
+- Vizualizovali sme povrch funkcie pomocou 3D grafu.
+
+- Vizualizovali sme porovnanie normy gradientu $|\nabla f|$ 
+v rôznych bodoch pomocou stĺpcového grafu.
+
+Gradient je základným nástrojom matematickej analýzy. Ukazuje smer
+najrýchlejšieho rastu funkcie — podobne ako najkratšia cesta na vrchol hory.
+Nachádza uplatnenie v optimalizácii, fyzike aj strojovom učení.
+
+# Literatúra

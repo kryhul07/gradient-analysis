@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="sk" xml:lang="sk"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Maksym Kryhul">
+
+<title>Gradient a smerová derivácia</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="Kryhul_Maksym_report_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Kryhul_Maksym_report_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="Kryhul_Maksym_report_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="Kryhul_Maksym_report_files/libs/quarto-html/popper.min.js"></script>
+<script src="Kryhul_Maksym_report_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Kryhul_Maksym_report_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Kryhul_Maksym_report_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Kryhul_Maksym_report_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Kryhul_Maksym_report_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Kryhul_Maksym_report_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Kryhul_Maksym_report_files/libs/bootstrap/bootstrap-67270d1595a62d14f123c043d4fb2f18.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Obsah</h2>
+   
+  <ul>
+  <li><a href="#úvod" id="toc-úvod" class="nav-link active" data-scroll-target="#úvod"><span class="header-section-number">1</span> Úvod</a></li>
+  <li><a href="#teoretické-pozadie" id="toc-teoretické-pozadie" class="nav-link" data-scroll-target="#teoretické-pozadie"><span class="header-section-number">2</span> Teoretické pozadie</a>
+  <ul class="collapse">
+  <li><a href="#parciálne-derivácie" id="toc-parciálne-derivácie" class="nav-link" data-scroll-target="#parciálne-derivácie"><span class="header-section-number">2.1</span> Parciálne derivácie</a></li>
+  <li><a href="#gradient" id="toc-gradient" class="nav-link" data-scroll-target="#gradient"><span class="header-section-number">2.2</span> Gradient</a></li>
+  <li><a href="#smerová-derivácia" id="toc-smerová-derivácia" class="nav-link" data-scroll-target="#smerová-derivácia"><span class="header-section-number">2.3</span> Smerová derivácia</a></li>
+  </ul></li>
+  <li><a href="#výpočty" id="toc-výpočty" class="nav-link" data-scroll-target="#výpočty"><span class="header-section-number">3</span> Výpočty</a>
+  <ul class="collapse">
+  <li><a href="#úloha-1-gradient-funkcie" id="toc-úloha-1-gradient-funkcie" class="nav-link" data-scroll-target="#úloha-1-gradient-funkcie"><span class="header-section-number">3.1</span> Úloha 1: Gradient funkcie</a></li>
+  <li><a href="#úloha-2-smerová-derivácia" id="toc-úloha-2-smerová-derivácia" class="nav-link" data-scroll-target="#úloha-2-smerová-derivácia"><span class="header-section-number">3.2</span> Úloha 2: Smerová derivácia</a></li>
+  </ul></li>
+  <li><a href="#vizualizácia" id="toc-vizualizácia" class="nav-link" data-scroll-target="#vizualizácia"><span class="header-section-number">4</span> Vizualizácia</a>
+  <ul class="collapse">
+  <li><a href="#d-graf-funkcie" id="toc-d-graf-funkcie" class="nav-link" data-scroll-target="#d-graf-funkcie"><span class="header-section-number">4.1</span> 3D Graf funkcie</a></li>
+  <li><a href="#porovnanie-normy-gradientu-v-rôznych-bodoch" id="toc-porovnanie-normy-gradientu-v-rôznych-bodoch" class="nav-link" data-scroll-target="#porovnanie-normy-gradientu-v-rôznych-bodoch"><span class="header-section-number">4.2</span> Porovnanie normy gradientu v rôznych bodoch</a></li>
+  </ul></li>
+  <li><a href="#záver" id="toc-záver" class="nav-link" data-scroll-target="#záver"><span class="header-section-number">5</span> Záver</a></li>
+  <li><a href="#literatúra" id="toc-literatúra" class="nav-link" data-scroll-target="#literatúra"><span class="header-section-number">6</span> Literatúra</a></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Ostatné formáty</h2><ul><li><a href="..\Kryhul_Maksym_report.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Gradient a smerová derivácia</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Autor</div>
+    <div class="quarto-title-meta-contents">
+             <p>Maksym Kryhul </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Publikované</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">01.05.2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="úvod" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Úvod</h1>
+<p>Gradient je vektor, ktorý v každom bode priestoru ukazuje smer najrýchlejšieho rastu danej skalárnej funkcie, pričom jeho veľkosť určuje rýchlosť tohto rastu. Z hľadiska geometrického významu je vektor gradientu vždy kolmý na vrstevnice (alebo ekvipotenciálne plochy) danej funkcie. Gradient patrí medzi kľúčové pojmy matematickej analýzy funkcií viacerých premenných a úzko súvisí s parciálnymi deriváciami a smerovou deriváciou.</p>
+<p>Nachádza uplatnenie v mnohých oblastiach aplikovanej matematiky, fyziky a informatiky. Napríklad v strojovom učení sa gradient využíva v algoritme gradientného zostupu na minimalizáciu účelovej funkcie. Vo fyzike gradient teplotného poľa udáva smer tepelného toku.</p>
+<p>V tejto správe sa venujeme gradientu a smerovej derivácii funkcií viacerých premenných. Výpočty realizujeme symbolicky v jazyku Python, výsledky vizualizujeme a interpretujeme ich geometrický význam.</p>
+<p>Ciele správy:</p>
+<ul>
+<li>vypočítať parciálne derivácie a gradient zadanej funkcie.</li>
+<li>určiť smerovú deriváciu v danom smere.</li>
+<li>vizualizovať povrch funkcie pomocou 3D grafu.</li>
+<li>analyzovať normu gradientu v rôznych bodoch.</li>
+<li>interpretovať výsledky geometricky.</li>
+</ul>
+</section>
+<section id="teoretické-pozadie" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Teoretické pozadie</h1>
+<p>Teoretické základy sú prevzaté z <span class="citation" data-cites="stewart2016calculus">(<a href="#ref-stewart2016calculus" role="doc-biblioref">Stewart 2016</a>)</span> a <span class="citation" data-cites="bacigal2026uvod">(<a href="#ref-bacigal2026uvod" role="doc-biblioref">Bacigál 2026</a>)</span>.</p>
+<section id="parciálne-derivácie" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="parciálne-derivácie"><span class="header-section-number">2.1</span> Parciálne derivácie</h2>
+<p>Nech <span class="math inline">\(f(x, y)\)</span> je funkcia dvoch premenných. Parciálna derivácia funkcie <span class="math inline">\(f\)</span> podľa premennej <span class="math inline">\(x\)</span> je definovaná ako:</p>
+<p><span id="eq-partial"><span class="math display">\[
+\frac{\partial f}{\partial x} = \lim_{\Delta x \to 0} \frac{f(x + \Delta x, y) - f(x, y)}{\Delta x}
+\tag{1}\]</span></span></p>
+<p>Analogicky definujeme parciálnu deriváciu podľa <span class="math inline">\(y\)</span>.</p>
+</section>
+<section id="gradient" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="gradient"><span class="header-section-number">2.2</span> Gradient</h2>
+<p>Gradient funkcie <span class="math inline">\(f(x,y)\)</span> je vektorová funkcia definovaná ako:</p>
+<p><span id="eq-gradient"><span class="math display">\[
+\nabla f(x, y) = \left( \frac{\partial f}{\partial x}, \frac{\partial f}{\partial y} \right)
+\tag{2}\]</span></span></p>
+<p>Gradient ukazuje smer <strong>najrýchlejšieho rastu</strong> funkcie v danom bode.</p>
+</section>
+<section id="smerová-derivácia" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="smerová-derivácia"><span class="header-section-number">2.3</span> Smerová derivácia</h2>
+<p>Smerová derivácia funkcie <span class="math inline">\(f\)</span> v bode <span class="math inline">\(B\)</span> v smere vektora <span class="math inline">\(\vec{v}\)</span> je:</p>
+<p><span id="eq-directional"><span class="math display">\[
+D_{\vec{v}} f = \nabla f \cdot \frac{\vec{v}}{|\vec{v}|}
+\tag{3}\]</span></span></p>
+<p>kde <span class="math inline">\(\nabla f\)</span> je gradient funkcie v danom bode a <span class="math inline">\(\frac{\vec{v}}{|\vec{v}|}\)</span> je jednotkový vektor smeru. Smerová derivácia udáva rýchlosť zmeny funkcie v smere vektora <span class="math inline">\(\vec{v}\)</span>.</p>
+</section>
+</section>
+<section id="výpočty" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Výpočty</h1>
+<p>V tejto správe používame knižnicu <code>sympy</code> <span class="citation" data-cites="sympy2023">(<a href="#ref-sympy2023" role="doc-biblioref">Team 2023</a>)</span> — knižnicu pre symbolickú matematiku v jazyku Python, <code>numpy</code> <span class="citation" data-cites="numpy2020">(<a href="#ref-numpy2020" role="doc-biblioref"><span class="nocase">Harris et al.</span> 2020</a>)</span> — pre numerické výpočty na sieti bodov.</p>
+<section id="úloha-1-gradient-funkcie" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="úloha-1-gradient-funkcie"><span class="header-section-number">3.1</span> Úloha 1: Gradient funkcie</h2>
+<p>Vypočítame gradient funkcie <span class="math inline">\(f(x, y) = \sqrt{4 + x^2 + y^2}\)</span> a vyjadríme ho v bode <span class="math inline">\(A = (1, 2)\)</span> (Úloha 3.3a, <span class="citation" data-cites="tomek2026">Tomek (<a href="#ref-tomek2026" role="doc-biblioref">2026</a>)</span>)</p>
+<div id="gradient-vypocet" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sympy <span class="im">as</span> sp</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>x, y <span class="op">=</span> sp.symbols(<span class="st">'x y'</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> sp.sqrt(<span class="dv">4</span> <span class="op">+</span> x<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> y<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>df_dx <span class="op">=</span> sp.diff(f, x)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>df_dy <span class="op">=</span> sp.diff(f, y)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#gradient</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>gradient <span class="op">=</span> sp.Matrix([df_dx, df_dy])</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Gradient f ="</span>, gradient)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">#gradient v bode A = (1, 2)</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>bod_A <span class="op">=</span> {x:<span class="dv">1</span>, y:<span class="dv">2</span>}</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>gradient_A <span class="op">=</span> gradient.subs(bod_A)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Gradient v bode A ="</span>, gradient_A)</span></code></pre></div><button title="Kopírovať do schránky" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Gradient f = Matrix([[x/sqrt(x**2 + y**2 + 4)], [y/sqrt(x**2 + y**2 + 4)]])
+Gradient v bode A = Matrix([[1/3], [2/3]])</code></pre>
+</div>
+</div>
+<p>Z výsledku vidíme, že gradient funkcie <span class="math inline">\(f\)</span> v bode <span class="math inline">\(A = (1, 2)\)</span> je:</p>
+<p><span class="math display">\[
+\nabla f(1, 2) = \left( \frac{1}{3}, \frac{2}{3} \right)
+\]</span></p>
+</section>
+<section id="úloha-2-smerová-derivácia" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="úloha-2-smerová-derivácia"><span class="header-section-number">3.2</span> Úloha 2: Smerová derivácia</h2>
+<p>Vypočítame smerovú deriváciu funkcie <span class="math inline">\(x^2 y + x y^2\)</span> v bode <span class="math inline">\(B = (1, 2)\)</span> v smere vektora <span class="math inline">\(\vec{v} = (3, 4)\)</span> (Úloha 3.5a, <span class="citation" data-cites="tomek2026">Tomek (<a href="#ref-tomek2026" role="doc-biblioref">2026</a>)</span>)</p>
+<div id="smerova-derivacia" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sympy <span class="im">as</span> sp</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>x, y <span class="op">=</span> sp.symbols(<span class="st">'x y'</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> x<span class="op">**</span><span class="dv">2</span> <span class="op">*</span> y <span class="op">+</span> x <span class="op">*</span> y<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>df_dx <span class="op">=</span> sp.diff(f, x)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>df_dy <span class="op">=</span> sp.diff(f, y)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co"># gradient</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>gradient <span class="op">=</span> sp.Matrix([df_dx, df_dy])</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co"># bod B a vektor v</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>bod_B <span class="op">=</span> {x:<span class="dv">1</span>, y:<span class="dv">2</span>}</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>v <span class="op">=</span> sp.Matrix([<span class="dv">3</span>, <span class="dv">4</span>])</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">#gradient v bode B</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>gradient_B <span class="op">=</span> gradient.subs(bod_B)</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co"># normalizovaný vektor</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>v_norm <span class="op">=</span> v <span class="op">/</span> v.norm()</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co"># smerová derivácia</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>D_v <span class="op">=</span> gradient_B.dot(v_norm)</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>D_v <span class="op">=</span> sp.simplify(D_v)</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Gradient ="</span>, gradient)</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Gradient v bode B ="</span>, gradient_B)</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Smerová derivácia ="</span>, D_v)</span></code></pre></div><button title="Kopírovať do schránky" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Gradient = Matrix([[2*x*y + y**2], [x**2 + 2*x*y]])
+Gradient v bode B = Matrix([[8], [5]])
+Smerová derivácia = 44/5</code></pre>
+</div>
+</div>
+<p>Z výsledku vidíme, že gradient funkcie <span class="math inline">\(f\)</span> v bode <span class="math inline">\(B = (1, 2)\)</span> je <span class="math inline">\(\nabla f(1, 2) = (8, 5)\)</span> a smerová derivácia v smere vektora <span class="math inline">\(\vec{v} = (3, 4)\)</span> je:</p>
+<p><span class="math display">\[
+D_{\vec{v}}f(1, 2) = \frac{44}{5} = 8{,}8
+\]</span></p>
+<p>To znamená, že funkcia rastie rýchlosťou <span class="math inline">\(8{,}8\)</span> na jednotku dĺžky v smere vektora <span class="math inline">\(\vec{v} = (3, 4)\)</span>.</p>
+</section>
+</section>
+<section id="vizualizácia" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Vizualizácia</h1>
+<p>V tejto kapitole vizualizujeme funkciu <span class="math inline">\(f(x, y) = x^2y + xy^2\)</span> pomocou knižníc <code>numpy</code> <span class="citation" data-cites="numpy2020">(<a href="#ref-numpy2020" role="doc-biblioref"><span class="nocase">Harris et al.</span> 2020</a>)</span> a <code>matplotlib</code> <span class="citation" data-cites="matplotlib2007">(<a href="#ref-matplotlib2007" role="doc-biblioref">Hunter 2007</a>)</span>.</p>
+<section id="d-graf-funkcie" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="d-graf-funkcie"><span class="header-section-number">4.1</span> 3D Graf funkcie</h2>
+<div id="cell-vizualizacia-3d" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># vytvoríme sieť bodov</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">50</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">50</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>X, Y <span class="op">=</span> np.meshgrid(x, y)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co"># funkcia </span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>F <span class="op">=</span> X<span class="op">**</span><span class="dv">2</span> <span class="op">*</span> Y <span class="op">+</span> X <span class="op">*</span> Y<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 3D graf</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>,<span class="dv">6</span>))</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> fig.add_subplot(<span class="dv">111</span>, projection <span class="op">=</span> <span class="st">'3d'</span>)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>ax.plot_surface(X, Y, F, cmap<span class="op">=</span><span class="st">'rainbow'</span>, alpha <span class="op">=</span> <span class="fl">0.85</span>)</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'x'</span>)</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'y'</span>)</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>ax.set_zlabel(<span class="st">'f(x, y)'</span>)</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Graf funkcie f(x, y) = x²y + xy²'</span>)</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Kopírovať do schránky" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Kryhul_Maksym_report_files/figure-html/vizualizacia-3d-output-1.png" id="vizualizacia-3d" width="555" height="566" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Graf zobrazuje povrch funkcie <span class="math inline">\(f(x, y) = x^2y + xy^2\)</span>. Červená farba zodpovedá vysokým hodnotám funkcie, modrá nízkym hodnotám.</p>
+</section>
+<section id="porovnanie-normy-gradientu-v-rôznych-bodoch" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="porovnanie-normy-gradientu-v-rôznych-bodoch"><span class="header-section-number">4.2</span> Porovnanie normy gradientu v rôznych bodoch</h2>
+<div id="cell-bar-chart" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sympy <span class="im">as</span> sp</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>x, y <span class="op">=</span> sp.symbols(<span class="st">'x y'</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> x<span class="op">**</span><span class="dv">2</span> <span class="op">*</span> y <span class="op">+</span> x <span class="op">*</span> y<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>df_dx <span class="op">=</span> sp.diff(f, x)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>df_dy <span class="op">=</span> sp.diff(f, y)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co"># body</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>body <span class="op">=</span> [(<span class="dv">0</span>, <span class="dv">0</span>), (<span class="dv">1</span>, <span class="dv">1</span>), (<span class="dv">1</span>, <span class="dv">2</span>), (<span class="dv">2</span>, <span class="dv">1</span>), (<span class="op">-</span><span class="dv">1</span>, <span class="dv">2</span>), (<span class="dv">2</span>, <span class="dv">2</span>), (<span class="op">-</span><span class="dv">2</span>, <span class="op">-</span><span class="dv">1</span>)]</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>normy <span class="op">=</span> []</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (bx, by) <span class="kw">in</span> body:</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    gx <span class="op">=</span> <span class="bu">float</span>(df_dx.subs({x: bx, y: by}))</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    gy <span class="op">=</span> <span class="bu">float</span>(df_dy.subs({x: bx, y: by}))</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    normy.append(<span class="bu">round</span>((gx<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> gy<span class="op">**</span><span class="dv">2</span>)<span class="op">**</span><span class="fl">0.5</span>, <span class="dv">3</span>))</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="co"># graf</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>nazvy <span class="op">=</span> [<span class="ss">f'(</span><span class="sc">{</span>bx<span class="sc">}</span><span class="ss">,</span><span class="sc">{</span>by<span class="sc">}</span><span class="ss">)'</span> <span class="cf">for</span> (bx, by) <span class="kw">in</span> body]</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>farby <span class="op">=</span> [<span class="st">'red'</span> <span class="cf">if</span> n <span class="op">&gt;</span> <span class="dv">7</span> <span class="cf">else</span> <span class="st">'blue'</span> <span class="cf">for</span> n <span class="kw">in</span> normy]</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">5</span>))</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>ax.bar(nazvy, normy, color<span class="op">=</span>farby)</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Bod (x, y)'</span>)</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Norma gradientu |∇f|'</span>)</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Porovnanie normy gradientu v rôznych bodoch funkcie x²y + xy²'</span>)</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>ax.axhline(y<span class="op">=</span><span class="dv">7</span>, color<span class="op">=</span><span class="st">'gray'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="st">'hranica rýchleho rastu'</span>)</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Kopírovať do schránky" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Kryhul_Maksym_report_files/figure-html/bar-chart-output-1.png" id="bar-chart" width="759" height="470" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Z grafu vidíme, že norma gradientu sa výrazne líši v závislosti od polohy bodu. V bode <span class="math inline">\((2, 2)\)</span> je norma gradientu najväčšia (<span class="math inline">\(|\nabla f| \approx 16.97\)</span>), čo znamená, že funkcia sa v tomto bode mení najrýchlejšie. Naopak, v bode <span class="math inline">\((0, 0)\)</span> je norma gradientu nulová — ide o stacionárny bod, kde funkcia nemá žiadny smer najrýchlejšieho rastu.</p>
+<p>Červené stĺpce označujú body s rýchlym rastom (<span class="math inline">\(|\nabla f| &gt; 7\)</span>), modré stĺpce body s pomalším rastom.</p>
+</section>
+</section>
+<section id="záver" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Záver</h1>
+<p>V tejto správe sme sa venovali gradientu a smerovej derivácii funkcií viacerých premenných.</p>
+<p>Hlavné výsledky:</p>
+<ul>
+<li><p>Vypočítali sme gradient funkcie <span class="math inline">\(f(x, y) = \sqrt{4 + x^2 + y^2}\)</span> a vyjadrili ho v bode <span class="math inline">\(A = (1, 2)\)</span>: <span class="math display">\[\nabla f(1, 2) = \left(\frac{1}{3}, \frac{2}{3}\right)\]</span></p></li>
+<li><p>Vypočítali sme smerovú deriváciu funkcie <span class="math inline">\(f(x, y) = x^2y + xy^2\)</span> v bode <span class="math inline">\(B = (1, 2)\)</span> v smere vektora <span class="math inline">\(\vec{v} = (3, 4)\)</span>: <span class="math display">\[D_{\vec{v}}f(1, 2) = \frac{44}{5}\]</span></p></li>
+<li><p>Vizualizovali sme povrch funkcie pomocou 3D grafu.</p></li>
+<li><p>Vizualizovali sme porovnanie normy gradientu <span class="math inline">\(|\nabla f|\)</span> v rôznych bodoch pomocou stĺpcového grafu.</p></li>
+</ul>
+<p>Gradient je základným nástrojom matematickej analýzy. Ukazuje smer najrýchlejšieho rastu funkcie — podobne ako najkratšia cesta na vrchol hory. Nachádza uplatnenie v optimalizácii, fyzike aj strojovom učení.</p>
+</section>
+<section id="literatúra" class="level1 unnumbered" data-number="6">
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">6 Literatúra</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-bacigal2026uvod" class="csl-entry" role="listitem">
+Bacigál, Tomáš. 2026. <em>Úvod do analýzy údajov pomocou R</em>. Spektrum STU. <a href="https://tomas-bacigal.quarto.pub/uvod-do-analyzy-udajov-pomocou-r/">https://tomas-bacigal.quarto.pub/uvod-do-analyzy-udajov-pomocou-r/</a>.
+</div>
+<div id="ref-numpy2020" class="csl-entry" role="listitem">
+<span class="nocase">Harris, Charles R. et al.</span> 2020. <em>NumPy: Array computing for Python</em>. <a href="https://numpy.org">https://numpy.org</a>.
+</div>
+<div id="ref-matplotlib2007" class="csl-entry" role="listitem">
+Hunter, John D. 2007. <em>Matplotlib: A 2D graphics environment</em>. <a href="https://matplotlib.org">https://matplotlib.org</a>.
+</div>
+<div id="ref-stewart2016calculus" class="csl-entry" role="listitem">
+Stewart, James. 2016. <em>Calculus: Early Transcendentals</em>. 8th vyd. Cengage Learning.
+</div>
+<div id="ref-sympy2023" class="csl-entry" role="listitem">
+Team, SymPy Development. 2023. <em>SymPy: Python library for symbolic mathematics</em>. <a href="https://www.sympy.org">https://www.sympy.org</a>.
+</div>
+<div id="ref-tomek2026" class="csl-entry" role="listitem">
+Tomek, Lukáš. 2026. <em>Matematická analýza 2 — cvičenia</em>. <a href="https://sites.google.com/site/lukastomekmath/vyucba/matematick-analza-2">https://sites.google.com/site/lukastomekmath/vyucba/matematick-analza-2</a>.
+</div>
+</div></section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Skopírované!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Skopírované!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
