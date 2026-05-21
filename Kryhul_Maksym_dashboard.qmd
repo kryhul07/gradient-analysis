@@ -1,0 +1,102 @@
+---
+title: "Gradient a smerová derivácia"
+author: "Maksym Kryhul"
+date: today
+date-format: "DD.MM.YYYY"
+format: dashboard
+lang: sk
+---
+
+```{python}
+#| include: false
+import sympy as sp
+import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+x, y = sp.symbols('x y')
+f = x**2 * y + x * y**2
+df_dx = sp.diff(f, x)
+df_dy = sp.diff(f, y)
+```
+
+# Vizualizácia
+
+## Row
+
+```{python}
+#| title: "Povrch funkcie f(x,y) = x²y + xy²"
+
+x_n = np.linspace(-3, 3, 50)
+y_n = np.linspace(-3, 3, 50)
+X, Y = np.meshgrid(x_n, y_n)
+F = X**2 * Y + X * Y**2
+
+fig = plt.figure(figsize=(6, 5))
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_surface(X, Y, F, cmap='rainbow', alpha=0.85)
+fig.savefig('temp3d.png', dpi=100, bbox_inches='tight')
+plt.close()
+
+from IPython.display import Image
+Image('temp3d.png')
+```
+
+```{python}
+#| title: "Kde funkcia rastie najrýchlejšie?"
+
+body = [(0,0), (1,1), (1,2), (2,1), (-1,2), (2,2), (-2,-1)]
+normy = []
+
+for (bx, by) in body:
+    gx = float(df_dx.subs({x: bx, y: by}))
+    gy = float(df_dy.subs({x: bx, y: by}))
+    normy.append(round((gx**2 + gy**2)**0.5, 3))
+
+nazvy = [f'({bx},{by})' for (bx, by) in body]
+farby = ['red' if n > 7 else 'steelblue' for n in normy]
+
+fig, ax = plt.subplots(figsize=(6, 5))
+ax.bar(nazvy, normy, color=farby)
+ax.axhline(y=7, color='gray', linestyle='--', label='hranica rýchleho rastu')
+ax.legend()
+fig.savefig('tempbar.png', dpi=100, bbox_inches='tight')
+plt.close()
+
+Image('tempbar.png')
+```
+
+# Výsledky
+
+## Row
+
+```{python}
+#| title: "Tabuľka hodnôt gradientu"
+
+body = [(0,0), (1,1), (1,2), (2,1), (-1,2), (2,2), (-2,-1)]
+
+print(f"{'Bod':<12} {'∂f/∂x':<10} {'∂f/∂y':<10} {'|∇f|':<10}")
+print("-" * 45)
+
+for (bx, by) in body:
+    gx = float(df_dx.subs({x: bx, y: by}))
+    gy = float(df_dy.subs({x: bx, y: by}))
+    norma = round((gx**2 + gy**2)**0.5, 3)
+    print(f"({bx},{by}){'':6} {gx:<10} {gy:<10} {norma:<10}")
+```
+
+```{python}
+#| title: "Zhrnutie hlavných výsledkov"
+
+print("ÚLOHA 1: Gradient funkcie")
+print("Funkcia:  f(x,y) = √(4 + x² + y²)")
+print("Bod:      A = (1, 2)")
+print("Výsledok: ∇f(1,2) = (1/3, 2/3)")
+print()
+print("ÚLOHA 2: Smerová derivácia")
+print("Funkcia:  f(x,y) = x²y + xy²")
+print("Bod:      B = (1, 2)")
+print("Smer:     v = (3, 4)")
+print("Výsledok: D_v f(1,2) = 44/5 = 8.8")
+```
